@@ -1,0 +1,28 @@
+
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Django settings and database files
+*.sqlite3
+.env
+db.sqlite3
+
+# MySQL database configuration files (optional)
+*.sql
+*.dump
+
+# Virtual environment
+myvenv/
+.venv/
+
+# IDE settings
+.vscode/
+.idea/
+
+# MacOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
