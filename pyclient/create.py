@@ -1,22 +1,31 @@
 import requests
 
-endpoint = "http://localhost:8000/api/salestrakav2/sales/"
+endpoint = "http://localhost:8000/api/salestrakav2/returns/"
 
 data = {
-        "ordersrc": "Instagram",
-        "productid": 3,
-        "quantity": 1,
-        "unit_price": 127000.00,
-        "userid": 1,
-        "branchid": 3,
-        "payment_choice": "Transfer"
-    }
-    
-
+    "orderid": "652fa563dce245",
+    "productid": 2,
+    "quantity": 1,
+    "action": "Replace",
+    "userid": 1,
+    "branchid": 1
+}
 
 get_response = requests.post(endpoint, json=data)
 
 print(get_response.json())
+
+# data = [
+#     {
+#     "ordersrc": "Instagram",
+#     "productid": 1,
+#     "quantity": 1,
+#     "unit_price": 127000.00,
+#     "userid": 1,
+#     "branchid": 1,
+#     "payment_choice": "Cash",
+# }
+# ]
 
 # data = {
 #     "productid": 3,
@@ -33,7 +42,7 @@ print(get_response.json())
 #     "mobile": "9126751245",
 #     "address": "nepa",
 #     "role": "Sales Rep",
-#     "branch": 4,
+#     "branch": 1,
 # }
 
 # data = {

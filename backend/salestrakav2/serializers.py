@@ -212,7 +212,8 @@ class ReturnsSerializer(serializers.ModelSerializer):
             'productid',
             'quantity',
             'action',
-            'staffid',
+            'userid',
+            'branchid',
             'date',
         ]
     

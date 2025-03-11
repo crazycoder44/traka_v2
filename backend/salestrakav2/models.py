@@ -1,6 +1,8 @@
 from django.db import models, transaction
 from django.contrib.auth.hashers import make_password
 from django.utils.functional import cached_property
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth import get_user_model
 import uuid
 
 
@@ -110,6 +112,10 @@ class Branches(models.Model):
         # Check if a branch with the same address already exists
         if Branches.objects.filter(address=address).exists():
             return {"message": "A branch already exists at this address."}
+        
+        # Check if a branch with the same mobile already exists
+        if Branches.objects.filter(mobile=mobile).exists():
+            return {"message": "A branch with this mobile already exists."}
 
         # No conflicts found, create a new branch
         branch_instance = Branches(branchname=branchname, address=address, mobile=mobile)
@@ -127,6 +133,7 @@ class Branches(models.Model):
         # Retrieve branch details from the validated data
         address = validated_data.get('address')
         mobile = validated_data.get('mobile')
+        status = validated_data.get('status')
 
 
         # Retrieve the existing branch instance by ID
@@ -148,6 +155,8 @@ class Branches(models.Model):
             branch_instance.address = address
         if mobile is not None:
             branch_instance.mobile = mobile
+        if status is not None:
+            branch_instance.status = status
 
         # Save the updated instance to the database
         branch_instance.save()
@@ -172,8 +181,46 @@ class Branches(models.Model):
             return {"message": "Branch does not exist."}
 
 
+class UsersManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        """Create and return a regular user with an email and password."""
+        if not email:
+            raise ValueError("The Email field must be set")
+        email = self.normalize_email(email)
 
-class Users(models.Model):
+        # Set permissions based on role
+        role = extra_fields.get('role')
+        if role == 'Sales Rep':
+            extra_fields['is_salesrep'] = True
+            extra_fields['is_admin'] = False
+            extra_fields['is_superadmin'] = False
+        elif role == 'Admin':
+            extra_fields['is_salesrep'] = False
+            extra_fields['is_admin'] = True
+            extra_fields['is_superadmin'] = False
+        elif role == 'Superadmin':
+            extra_fields['is_salesrep'] = False
+            extra_fields['is_admin'] = False
+            extra_fields['is_superadmin'] = True
+
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """Create and return a superuser with an email and password."""
+        extra_fields.setdefault('is_superadmin', True)
+        extra_fields.setdefault('is_salesrep', False)
+        extra_fields.setdefault('is_admin', False)
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_active', True)
+
+        return self.create_user(email, password, **extra_fields)
+
+
+
+class Users(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = [
         ('Male', 'Male'),
         ('Female', 'Female'),
@@ -188,7 +235,7 @@ class Users(models.Model):
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=30)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    email = models.CharField(max_length=100)
+    email = models.CharField(max_length=100, unique=True)
     mobile = models.CharField(max_length=15)
     address = models.TextField()
     role = models.CharField(max_length=11, choices=ROLE_CHOICES)
@@ -202,8 +249,31 @@ class Users(models.Model):
     ]
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
 
+    # Custom permission flags
+    is_salesrep = models.BooleanField(default=False)
+    is_superadmin = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=True)
+
+    objects = UsersManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['firstname', 'lastname', 'gender', 'mobile', 'address', 'role', 'branchid']  # Fields that are required for creating a user
+
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
+    
+    # Custom method for user role check
+    def is_sales_rep(self):
+        return self.is_salesrep
+
+    def is_super_admin(self):
+        return self.is_superadmin
+
+    def is_admin_user(self):
+        return self.is_admin
 
     @classmethod
     def add_user(cls, validated_data):
@@ -214,6 +284,21 @@ class Users(models.Model):
         # Hash the password and create a new user
         password = validated_data.get('password', "1234567")  # Default if password not in validated_data
         hashed_password = make_password(password)
+
+        # Set permissions based on role
+        role = validated_data.get('role')
+        if role == 'Sales Rep':
+            validated_data['is_salesrep'] = True
+            validated_data['is_admin'] = False
+            validated_data['is_superadmin'] = False
+        elif role == 'Admin':
+            validated_data['is_salesrep'] = False
+            validated_data['is_admin'] = True
+            validated_data['is_superadmin'] = False
+        elif role == 'Superadmin':
+            validated_data['is_salesrep'] = False
+            validated_data['is_admin'] = False
+            validated_data['is_superadmin'] = True
         
         # Save the new user instance with hashed password
         new_user = cls(
@@ -225,7 +310,10 @@ class Users(models.Model):
             address=validated_data.get('address'),
             role=validated_data.get('role'),
             branchid=validated_data.get('branchid'),
-            password=hashed_password
+            password=hashed_password,
+            is_salesrep=validated_data.get('is_salesrep'),
+            is_admin=validated_data.get('is_admin'),
+            is_superadmin=validated_data.get('is_superadmin')
         )
         new_user.save()
         return new_user
@@ -312,7 +400,7 @@ class Sales(models.Model):
     productid = models.ForeignKey(Products, on_delete=models.PROTECT)
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=15, decimal_places=2)
-    userid = models.ForeignKey(Users, on_delete=models.PROTECT)
+    userid = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     branchid = models.ForeignKey(Branches, on_delete=models.PROTECT)
     payment_choice = models.CharField(max_length=15, choices=PAYMENT_CHOICES)
     date = models.DateTimeField(auto_now_add=True)
@@ -487,7 +575,7 @@ class Returns(models.Model):
 
             return 'Return processed successfully'
         # For other actions, add additional handling here
-        return 'Return action processed'
+        return 'Return processed successfully'
 
 
     def __str__(self):

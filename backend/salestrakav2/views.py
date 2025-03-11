@@ -207,12 +207,12 @@ class ReturnsDetailAPIView(generics.RetrieveAPIView):
 returns_detail_view = ReturnsDetailAPIView.as_view()
 
 
-class ReturnsUpdateAPIView(generics.UpdateAPIView):
-    queryset = Returns.objects.all()
-    serializer_class = ReturnsSerializer
-    # lookup_field = 'id'
+# class ReturnsUpdateAPIView(generics.UpdateAPIView):
+#     queryset = Returns.objects.all()
+#     serializer_class = ReturnsSerializer
+#     # lookup_field = 'id'
 
-returns_update_view = ReturnsUpdateAPIView.as_view()
+# returns_update_view = ReturnsUpdateAPIView.as_view()
 
 
 class ReturnsDestroyAPIView(generics.DestroyAPIView):

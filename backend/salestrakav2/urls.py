@@ -24,7 +24,7 @@ urlpatterns = [
     path('sales/<int:pk>/', views.sales_detail_view),
 
     path('returns/', views.returns_listcreate_view),
-    path('returns/<int:pk>/update/', views.returns_update_view),
+    # path('returns/<int:pk>/update/', views.returns_update_view),
     path('returns/<int:pk>/delete/', views.returns_destroy_view),
     path('returns/<int:pk>/', views.returns_detail_view),
     
