@@ -1,5 +1,10 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
 
 from .models import Products
 from .models import Branches
@@ -17,7 +22,58 @@ from .serializers import InventorySerializer
 
 
 
+class UserLoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]  # Allow anyone to login
 
+user_login_view = UserLoginView.as_view()
+
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        # Get the refresh token from the request data
+        refresh_token = request.data.get('refresh', None)
+
+        # If no refresh token is provided, return a bad request response
+        if not refresh_token:
+            return Response({"detail": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Try to create a new access token using the provided refresh token
+        try:
+            # Create a RefreshToken instance from the provided refresh token
+            token = RefreshToken(refresh_token)
+            # Generate the new access token
+            access_token = str(token.access_token)
+            return Response({"access": access_token}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # If there's an error (e.g., the refresh token is invalid), return a bad request response
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+token_refresh_view = CustomTokenRefreshView.as_view()
+
+
+class RegisterUserView(generics.CreateAPIView):
+    queryset = Users.objects.all()
+    serializer_class = UsersSerializer
+    permission_classes = [AllowAny]  # Allow anyone to register
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Create the user using the `create` method of the serializer
+        user = Users.add_user(serializer.validated_data)
+
+         # If add_user returns a dictionary with a message, it's an error
+        if isinstance(user, dict) and 'message' in user:
+            return Response(user, status=status.HTTP_400_BAD_REQUEST)
+
+        # Return the user data excluding the password
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+users_register_view = RegisterUserView.as_view()
 
 
 
@@ -104,15 +160,6 @@ class BranchesDestroyAPIView(generics.DestroyAPIView):
     # lookup_field = 'pk'
 
 branches_destroy_view = BranchesDestroyAPIView.as_view()
-
-
-
-class UsersListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
-    # lookup_field = 'id'
-
-users_listcreate_view = UsersListCreateAPIView.as_view()
 
 
 

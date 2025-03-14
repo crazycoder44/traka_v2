@@ -260,7 +260,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     objects = UsersManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['firstname', 'lastname', 'gender', 'mobile', 'address', 'role', 'branchid']  # Fields that are required for creating a user
+    REQUIRED_FIELDS = ['firstname', 'lastname', 'gender', 'mobile', 'address', 'role']  # Fields that are required for creating a user
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"

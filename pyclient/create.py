@@ -1,19 +1,32 @@
 import requests
 
-endpoint = "http://localhost:8000/api/salestrakav2/returns/"
+endpoint = "http://localhost:8000/api/salestrakav2/products/"
 
 data = {
-    "orderid": "652fa563dce245",
-    "productid": 2,
-    "quantity": 1,
-    "action": "Replace",
-    "userid": 1,
-    "branchid": 1
+    "productname": "Mixer",
+    "price": 215000.00
 }
 
-get_response = requests.post(endpoint, json=data)
+# Your authorization token (replace this with your actual token)
+auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQxODgwNDIxLCJpYXQiOjE3NDE4Nzg2MjEsImp0aSI6IjI5ZDdjNWVhOTU0ZjQzN2ViZDc3ZTczMTg3YmExMWQ4IiwidXNlcl9pZCI6MX0.oAFpTeubz4LkEAaeZ7ND05QIl7JW8hyrrtKS2PNzwx8"
+
+# Define headers to include the token
+headers = {
+    "Authorization": f"Bearer {auth_token}"
+}
+
+get_response = requests.post(endpoint, json=data, headers=headers)
 
 print(get_response.json())
+
+# data = {
+#     "orderid": "652fa563dce245",
+#     "productid": 2,
+#     "quantity": 1,
+#     "action": "Replace",
+#     "userid": 1,
+#     "branchid": 1
+# }
 
 # data = [
 #     {
@@ -42,7 +55,7 @@ print(get_response.json())
 #     "mobile": "9126751245",
 #     "address": "nepa",
 #     "role": "Sales Rep",
-#     "branch": 1,
+#     "branchid": 1,
 # }
 
 # data = {
