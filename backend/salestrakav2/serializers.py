@@ -151,6 +151,30 @@ class UsersSerializer(serializers.ModelSerializer):
 
 
 
+class UsersLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Users
+        fields = [
+            'pk',
+            'firstname',
+            'lastname',
+            'gender',
+            'email',
+            'mobile',
+            'address',
+            'role',
+            'datejoined',
+            'branchid',
+            'status',
+            'is_staff',
+            'is_active',
+            'is_salesrep', 
+            'is_admin', 
+            'is_superadmin',
+        ]
+
+
+
 class SalesListSerializer(serializers.ListSerializer):
     def create(self, validated_data):
         print(f'validated data = {validated_data}')

@@ -11,7 +11,7 @@
         -->
         <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
         <meta charset="utf-8" />
-        <title>Buchymix: Login Page</title>
+        <title>Salestraka : Login Page</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta content="" name="description" />
         <meta content="" name="author" />
@@ -120,20 +120,20 @@
             // Handle form submission
             $('#loginform').on('submit', function (e) {
                 e.preventDefault();  // Prevent default form submission
-
+        
                 // Get form data
                 const email = $('#user_login').val();
                 const password = $('#user_pass').val();
-
+        
                 // Prepare the data to send
                 const data = {
                     email: email,
                     password: password
                 };
-
+        
                 // Send the data to the API
                 $.ajax({
-                    url: 'http://localhost:8000/api/salestrakav2/login/',
+                    url: 'http://localhost:8000/api/salestrakav2/login/',  // Adjust to your API URL
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
@@ -142,21 +142,27 @@
                     },
                     success: function(response) {
                         // Check if the response contains an access token
-                        if (response.access) {
+                        if (response.access && response.user) {
                             // Show success message
                             $('.msg').text("Login Successful").css("color", "green").show();
-
+        
+                            // Store user data in sessionStorage
+                            sessionStorage.setItem('user', JSON.stringify(response.user));
+        
                             // Redirect after 2 seconds
                             setTimeout(function() {
-                                window.location.href = "index.html";
-                            }, 2000);
+                                // window.location.href = "index.html";  // Redirect to homepage or dashboard
+                                window.open("index.html", "_blank");
+                            }, 1400);
                         }
                     },
                     error: function(xhr, status, error) {
                         const response = xhr.responseJSON;
-                        if (response && response.detail === 'No active account found with the given credentials') {
+                        if (response && response.error === 'Invalid credentials.') {
                             // Show error message for invalid credentials
                             $('.msg').text("Invalid credentials").css("color", "red").show();
+                        } else if (response && response.error === 'Email and password are required.') {
+                            $('.msg').text("Email and password are required.").css("color", "red").show();
                         } else {
                             // Handle other errors
                             $('.msg').text("An error occurred. Please try again later.").css("color", "red").show();
@@ -164,7 +170,7 @@
                     }
                 });
             });
-        </script>
+        </script>        
     </body>
 </html>
 

@@ -19,7 +19,7 @@ urlpatterns = [
 
     path('users/<int:pk>/update/', views.users_update_view),
     path('users/<int:pk>/delete/', views.users_destroy_view),
-    path('users/<int:pk>/', views.users_detail_view),
+    path('users/<int:pk>/', views.users_detail_view, name='users_detail_view'),
 
     path('sales/', views.sales_listcreate_view),
     # path('sales/<int:pk>/update/', views.sales_update_view),

@@ -5,6 +5,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from datetime import timedelta
+
 
 from .models import Products
 from .models import Branches
@@ -16,6 +18,7 @@ from .models import Inventory
 from .serializers import ProductsSerializer
 from .serializers import BranchesSerializer
 from .serializers import UsersSerializer
+from .serializers import UsersLoginSerializer
 from .serializers import SalesSerializer
 from .serializers import ReturnsSerializer
 from .serializers import InventorySerializer
@@ -24,6 +27,61 @@ from .serializers import InventorySerializer
 
 class UserLoginView(TokenObtainPairView):
     permission_classes = [AllowAny]  # Allow anyone to login
+
+    def post(self, request, *args, **kwargs):
+        # Step 1: Get the email and password from the request
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not email or not password:
+            return Response(
+                {"error": "Email and password are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Step 2: Authenticate the user based on email and password
+        User = get_user_model()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "Invalid credentials."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Step 3: Verify the password for the user
+        if not user.check_password(password):
+            return Response(
+                {"error": "Invalid credentials."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Step 4: Generate tokens for the authenticated user
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        # Step 5: Serialize user data (no need for an additional request to get user details)
+        user_data = UsersLoginSerializer(user).data  # Use the appropriate serializer
+
+        # Step 6: Set the tokens as HttpOnly cookies (handled server-side)
+        response = Response({
+            "access": access_token,
+            "refresh": refresh_token,
+            "user": user_data
+        })
+
+        # Set the cookies on the response
+        response.set_cookie(
+            'access_token', access_token, 
+            httponly=True, secure=False, samesite='Lax', max_age=timedelta(minutes=30)
+        )
+        response.set_cookie(
+            'refresh_token', refresh_token, 
+            httponly=True, secure=False, samesite='Lax', max_age=timedelta(hours=12)
+        )
+
+        return response
 
 user_login_view = UserLoginView.as_view()
 
