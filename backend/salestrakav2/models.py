@@ -16,7 +16,7 @@ class Products(models.Model):
         (0, 'Unavailable'),
         (1, 'Available')
     ]
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
 
 
     @staticmethod
@@ -27,7 +27,7 @@ class Products(models.Model):
             return {"message": "A product already exists with this name."}
         
         if 'status' not in validated_data:
-            validated_data['status'] = 0
+            validated_data['status'] = 1
 
         product_instance = Products(**validated_data)
         product_instance.save()
@@ -94,7 +94,7 @@ class Branches(models.Model):
         (0, 'Unavailable'),
         (1, 'Available')
     ]
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
 
     def __str__(self):
         return self.branchname
@@ -247,7 +247,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
         (0, 'Unavailable'),
         (1, 'Available')
     ]
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
 
     # Custom permission flags
     is_salesrep = models.BooleanField(default=False)

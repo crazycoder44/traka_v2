@@ -146,8 +146,10 @@
                             // Show success message
                             $('.msg').text("Login Successful").css("color", "green").show();
         
-                            // Store user data in sessionStorage
+                            // Store tokens and user data in sessionStorage
                             sessionStorage.setItem('user', JSON.stringify(response.user));
+                            sessionStorage.setItem('access', JSON.stringify(response.access));
+                            sessionStorage.setItem('refresh', JSON.stringify(response.refresh));
         
                             // Redirect after 2 seconds
                             setTimeout(function() {

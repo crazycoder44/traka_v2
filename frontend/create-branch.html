@@ -279,7 +279,7 @@
                                         <div class="col-lg-12 col-md-12 col-12">
 
 
-                                            <form id="add_product" action="javascript:;">
+                                            <form id="create_branch" action="javascript:;">
 
                                                 <div class="form-group">
                                                     <div class="controls">
@@ -353,6 +353,66 @@
         <script src="assets/plugins/sparkline-chart/jquery.sparkline.min.js" type="text/javascript"></script>
         <script src="assets/js/chart-sparkline.js" type="text/javascript"></script>
         <!-- Sidebar Graph - END --> 
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const form = document.getElementById('create_branch');
+                
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    // Gather form data
+                    const branchName = document.getElementById('branchname').value;
+                    const address = document.getElementById('address').value;
+                    const mobile = document.getElementById('mobile').value;
+                    let accessToken = sessionStorage.getItem('access');
+
+                    if (accessToken) {
+                        accessToken = accessToken.replace(/^"|"$/g, '').trim();  // Remove any extra quotes and trim spaces
+                    }
+
+                    if (!accessToken) {
+                        alert('You are not authorized to perform this operation');
+                        return;
+                    }
+
+                    // Prepare the data to send
+                    const data = {
+                        branchname: branchName,
+                        address: address,
+                        mobile: mobile,
+                    };
+
+                    // Use fetch to send the POST request
+                    fetch('http://localhost:8000/api/salestrakav2/branches/', {
+                        method: 'POST', // HTTP method
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json(); // Parse the JSON response
+                        } else {
+                            return response.json().then(errorData => {
+                                throw new Error(`Error ${response.status}: ${errorData.message || 'Failed to create branch'}`);
+                            });
+                        }
+                    })
+                    .then(data => {
+                        console.log('Branch created successfully:', data);
+                        alert('Branch created successfully!');
+                        form.reset(); // Reset the form fields
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error creating branch');
+                    });
+                });
+            });
+        </script>
     </body>
 </html>
 

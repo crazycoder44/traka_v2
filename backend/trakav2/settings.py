@@ -157,6 +157,18 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",  # your front-end app URL
+    "http://127.0.0.1:5500",  # Replace with your frontend URL
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_HEADERS = [
+    'Authorization',  # Allow the Authorization header
+    'Content-Type',
+]
+
+CORS_ALLOWED_METHODS = [
+    "GET", "POST", "PUT", "DELETE", "OPTIONS"
+]
+
+# CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:5500']

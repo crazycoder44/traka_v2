@@ -71,16 +71,6 @@ class UserLoginView(TokenObtainPairView):
             "user": user_data
         })
 
-        # Set the cookies on the response
-        response.set_cookie(
-            'access_token', access_token, 
-            httponly=True, secure=False, samesite='Lax', max_age=timedelta(minutes=30)
-        )
-        response.set_cookie(
-            'refresh_token', refresh_token, 
-            httponly=True, secure=False, samesite='Lax', max_age=timedelta(hours=12)
-        )
-
         return response
 
 user_login_view = UserLoginView.as_view()
@@ -219,6 +209,14 @@ class BranchesDestroyAPIView(generics.DestroyAPIView):
 
 branches_destroy_view = BranchesDestroyAPIView.as_view()
 
+
+
+class UsersListAPIView(generics.ListAPIView):
+    queryset = Users.objects.all()
+    serializer_class = UsersSerializer
+    # lookup_field = 'id'
+
+users_list_view = UsersListAPIView.as_view()
 
 
 class UsersDetailAPIView(generics.RetrieveAPIView):

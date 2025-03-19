@@ -1,0 +1,11 @@
+
+/* Small button styles with reduced size and border radius */
+.btn-sm {
+    padding: 0.2rem 0.4rem;  /* Make the padding smaller */
+    font-size: 0.7rem;       /* Reduce the font size */
+    line-height: 1.25;
+    border-radius: 0.2rem;   /* Apply a small border radius */
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}

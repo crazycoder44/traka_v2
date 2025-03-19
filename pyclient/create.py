@@ -1,23 +1,29 @@
 import requests
 
-endpoint = "http://localhost:8000/api/salestrakav2/login/"
+endpoint = "http://localhost:8000/api/salestrakav2/branches/"
 
 data = {
-    "email": "panda@gmail.com",
-    "password": "1234567"
+    "branchname": "ikeja",
+    "address": "gbera",
+    "mobile": "9023416389"
 }
 
 # Your authorization token (replace this with your actual token)
-# auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQxODgwNDIxLCJpYXQiOjE3NDE4Nzg2MjEsImp0aSI6IjI5ZDdjNWVhOTU0ZjQzN2ViZDc3ZTczMTg3YmExMWQ4IiwidXNlcl9pZCI6MX0.oAFpTeubz4LkEAaeZ7ND05QIl7JW8hyrrtKS2PNzwx8"
+auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMzk1NjQ4LCJpYXQiOjE3NDIzOTM4NDgsImp0aSI6IjlmZTBlODE5Yjk2MzQxZGU4MzE1OTNhYjQ2ZjA3YTk1IiwidXNlcl9pZCI6M30.Vj_rrsZD5ux2X1kIEh9YNOmvLM45Jv1--u2mV-8LvWA"
 
 # Define headers to include the token
-# headers = {
-#     "Authorization": f"Bearer {auth_token}"
-# }
+headers = {
+    "Authorization": f"Bearer {auth_token}"
+}
 
-get_response = requests.post(endpoint, json=data)
+get_response = requests.post(endpoint, json=data, headers=headers)
 
 print(get_response.json())
+
+# data = {
+#     "email": "panda@gmail.com",
+#     "password": "1234567"
+# }
 
 # data = {
 #     "orderid": "652fa563dce245",
