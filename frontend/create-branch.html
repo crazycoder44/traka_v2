@@ -396,8 +396,11 @@
                         if (response.ok) {
                             return response.json(); // Parse the JSON response
                         } else {
-                            return response.json().then(errorData => {
-                                throw new Error(`Error ${response.status}: ${errorData.message || 'Failed to create branch'}`);
+                            // If the response isn't successful (e.g., 400), parse the error message
+                            return response.json().then(errData => {
+                                // Extract the string error message from ErrorDetail
+                                const errorMessage = errData.message ? errData.message : "An unknown error occurred";
+                                throw new Error(errorMessage); // Throw the error message directly
                             });
                         }
                     })
@@ -408,7 +411,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error creating branch');
+                        alert(error.message);
                     });
                 });
             });

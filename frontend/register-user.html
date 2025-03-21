@@ -503,13 +503,16 @@
                     body: JSON.stringify(data), // Convert form data to JSON
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errorData => {
-                            console.error('Error response:', errorData); // Log error details
-                            throw new Error('Failed to register user');
+                    if (response.ok) {
+                        return response.json(); // Parse the JSON response
+                    } else {
+                        // If the response isn't successful (e.g., 400), parse the error message
+                        return response.json().then(errData => {
+                            // Extract the string error message from ErrorDetail
+                            const errorMessage = errData.message ? errData.message : "An unknown error occurred";
+                            throw new Error(errorMessage); // Throw the error message directly
                         });
                     }
-                    return response.json();
                 })
                 .then(data => {
                     console.log('User registered successfully:', data);
@@ -518,7 +521,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error registering user');
+                    alert(error.message);
                 });
             });
         </script>

@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.functional import cached_property
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth import get_user_model
+from rest_framework.exceptions import ValidationError
 import uuid
 
 
@@ -24,7 +25,7 @@ class Products(models.Model):
         # Check if a product with the same name already exists
         product_name = validated_data.get('productname')
         if Products.objects.filter(productname=product_name).exists():
-            return {"message": "A product already exists with this name."}
+            raise ValidationError("A product already exists with this name.")
         
         if 'status' not in validated_data:
             validated_data['status'] = 1
@@ -107,15 +108,15 @@ class Branches(models.Model):
 
         # Check if a branch with the same name already exists
         if Branches.objects.filter(branchname=branchname).exists():
-            return {"message": "A branch with this name already exists."}
+            raise ValidationError("A branch with this name already exists.")
 
         # Check if a branch with the same address already exists
         if Branches.objects.filter(address=address).exists():
-            return {"message": "A branch already exists at this address."}
+            raise ValidationError("A branch already exists at this address.")
         
         # Check if a branch with the same mobile already exists
         if Branches.objects.filter(mobile=mobile).exists():
-            return {"message": "A branch with this mobile already exists."}
+            raise ValidationError("A branch with this mobile already exists.")
 
         # No conflicts found, create a new branch
         branch_instance = Branches(branchname=branchname, address=address, mobile=mobile)
@@ -279,7 +280,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     def add_user(cls, validated_data):
         # Check if a user with the given email already exists
         if cls.objects.filter(email=validated_data.get('email')).exists():
-            return {"message": "A user already exists with this email."}
+            raise ValidationError("A user already exists with this email")
 
         # Hash the password and create a new user
         password = validated_data.get('password', "1234567")  # Default if password not in validated_data

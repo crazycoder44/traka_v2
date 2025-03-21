@@ -1,15 +1,20 @@
 import requests
 
-endpoint = "http://localhost:8000/api/salestrakav2/branches/"
+endpoint = "http://localhost:8000/api/salestrakav2/register/"
 
 data = {
-    "branchname": "ikeja",
-    "address": "gbera",
-    "mobile": "9023416389"
+    "firstname": "panda",
+    "lastname": "hyena",
+    "gender": "Male",
+    "email": "panda@gmail.com",
+    "mobile": "9126751245",
+    "address": "nepa",
+    "role": "Sales Rep",
+    "branchid": 1,
 }
 
 # Your authorization token (replace this with your actual token)
-auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMzk1NjQ4LCJpYXQiOjE3NDIzOTM4NDgsImp0aSI6IjlmZTBlODE5Yjk2MzQxZGU4MzE1OTNhYjQ2ZjA3YTk1IiwidXNlcl9pZCI6M30.Vj_rrsZD5ux2X1kIEh9YNOmvLM45Jv1--u2mV-8LvWA"
+auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyNTc1OTg3LCJpYXQiOjE3NDI1NzQxODcsImp0aSI6ImFhMTJiNWE0M2JiMjRmMWNiYjY2NDgxZWE4NmI5MDAzIiwidXNlcl9pZCI6MX0.wal18DnPHpaw4RG97r0rGV680CJf_koo3YgILfKvngo"
 
 # Define headers to include the token
 headers = {

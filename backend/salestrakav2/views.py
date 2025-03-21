@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from rest_framework.exceptions import ValidationError
 from datetime import timedelta
 
 
@@ -108,18 +109,39 @@ class RegisterUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]  # Allow anyone to register
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        # Create the user using the `create` method of the serializer
-        user = Users.add_user(serializer.validated_data)
+            # Create the user using the `add_user` method
+            user = Users.add_user(serializer.validated_data)
 
-         # If add_user returns a dictionary with a message, it's an error
-        if isinstance(user, dict) and 'message' in user:
-            return Response(user, status=status.HTTP_400_BAD_REQUEST)
+            # If add_user returns a dictionary with a message, it's an error
+            if isinstance(user, dict) and 'message' in user:
+                return Response(user, status=status.HTTP_400_BAD_REQUEST)
 
-        # Return the user data excluding the password
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Return the user data excluding the password
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            # Extract the error message from the ValidationError
+            error_messages = e.detail  # e.detail contains the error details
+
+            # Extract the first error message from the field's error details
+            if isinstance(error_messages, dict):
+                # Extract error message for the email field (or any other field)
+                email_errors = error_messages.get('email', [])
+                if email_errors:
+                    # Extract the actual error string from the ErrorDetail object
+                    error_message = email_errors[0]  # This gets the actual error string
+
+                else:
+                    error_message = 'An unknown error occurred'
+            else:
+                error_message = 'An unknown error occurred'
+
+            # Return the error message in the response
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 users_register_view = RegisterUserView.as_view()
 
@@ -128,6 +150,27 @@ users_register_view = RegisterUserView.as_view()
 class ProductsListCreateAPIView(generics.ListCreateAPIView):
     queryset = Products.objects.all()
     serializer_class = ProductsSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Call the add_product method to create the product
+            validated_data = request.data
+            product = Products.add_product(validated_data)
+            return Response(self.get_serializer(product).data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            # Extract the error message from the ValidationError
+            # The error could be inside non_field_errors or a similar structure
+            error_messages = e.detail  # e.detail contains the error details
+            if isinstance(error_messages, dict):  # If error details are in dictionary form
+                # You can access specific error message here
+                error_message = error_messages.get('non_field_errors', ['An error occurred'])[0]
+            elif isinstance(error_messages, list):  # If it's in a list format
+                error_message = error_messages[0]
+            else:
+                error_message = 'An error occurred'
+
+            # Return the response with only the error message
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 products_list_create_view = ProductsListCreateAPIView.as_view()
 
@@ -182,6 +225,27 @@ products_destroy_view = ProductsDestroyAPIView.as_view()
 class BranchesListCreateAPIView(generics.ListCreateAPIView):
     queryset = Branches.objects.all()
     serializer_class = BranchesSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Call the add_product method to create the product
+            validated_data = request.data
+            branch = Branches.add_branch(validated_data)
+            return Response(self.get_serializer(branch).data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            # Extract the error message from the ValidationError
+            # The error could be inside non_field_errors or a similar structure
+            error_messages = e.detail  # e.detail contains the error details
+            if isinstance(error_messages, dict):  # If error details are in dictionary form
+                # You can access specific error message here
+                error_message = error_messages.get('non_field_errors', ['An error occurred'])[0]
+            elif isinstance(error_messages, list):  # If it's in a list format
+                error_message = error_messages[0]
+            else:
+                error_message = 'An error occurred'
+
+            # Return the response with only the error message
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 branches_listcreate_view = BranchesListCreateAPIView.as_view()
 
